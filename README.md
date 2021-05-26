@@ -7,6 +7,8 @@ Adds support to Awesome Enterprise for sending emails, SMS and push notification
 
 ### Changelog  
 
+##### 1.0.5
+* Added sms provider sms77
 
 ##### 1.0.4
 * Fixed: Added option to specify the template for msg91 sms.
