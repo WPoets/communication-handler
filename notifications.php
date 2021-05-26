@@ -9,11 +9,11 @@ function wpmail($atts,$content=null,$shortcode){
     extract(\aw2_library::shortcode_atts( array(
         'email' => null,
         'log' => null,
-        'notification_object_type' => null,    
+        'notification_object_type' => null,
         'notification_object_id' => null,
         'tracking_set' => null
     ), $atts, 'aw2_wpmail' ) );
-    
+
     // if email is null, return
     if(is_null($email)) return;
 
@@ -22,7 +22,7 @@ function wpmail($atts,$content=null,$shortcode){
     if(!isset($email['message']))$email['message']='';
 	if(!isset($email['headers']))$email['headers']='';
     if(!isset($email['attachment']))$email['attachment']='';
-	
+
 	$tracking = array();
     if(!empty($tracking_set))$tracking['tracking_set']=$tracking_set;
 
@@ -30,12 +30,12 @@ function wpmail($atts,$content=null,$shortcode){
 	require_once __DIR__ .'/includes/notification_helper.php';
     \notification_log('mail', 'wpmail', $email, $log, $notification_object_type, $notification_object_id,$tracking);
 
-	wp_mail( 
-        $email['to']['email_id'], 
-        $email['subject'], 
-        $email['message'], 
-        $email['headers'], 
-        $email['attachments'] 
+	wp_mail(
+        $email['to']['email_id'],
+        $email['subject'],
+        $email['message'],
+        $email['headers'],
+        $email['attachments']
     );
 
     $return_value = "success";
@@ -49,26 +49,26 @@ function sendgrid($atts,$content=null,$shortcode){
     if(\aw2_library::pre_actions('all',$atts,$content,$shortcode)==false)return;
 
     //including SENDGRID library
-	
+
 	//require_once AWESOME_PATH.'/vendor/autoload.php';
-        
+
     extract(\aw2_library::shortcode_atts( array(
 		'email' => null,
         'log' => null,
-        'notification_object_type' => null,    
+        'notification_object_type' => null,
         'notification_object_id' => null,
         'tracking_set' => null
     ), $atts, 'aw2_sendgrid' ) );
-    
+
     // if email is null, return
     if(is_null($email)) return;
-    
+
     // Checking for values and setting them if not present.
 	if(!isset($email['from']['email_id']))$email['from']['email_id']='';
 	if(!isset($email['to']['email_id']))$email['to']['email_id']='';
     if(!isset($email['message']))$email['message']='';
     if(!isset($email['subject']))$email['subject']='';
-		
+
     //provider.apiKey or settings.sendgrid_apiKey
     $apiKey = $email['provider']['key'];
 
@@ -91,14 +91,14 @@ function sendgrid($atts,$content=null,$shortcode){
     }
 
 
-    // Content 
+    // Content
     $sendgrid_email->addContent(
         "text/html", $email['message']
     );
 
     // Works on only when the attachments are present
     if(isset($email['attachments']['file'])){
-        
+
         //storing file array in variable
         $file = $email['attachments']['file'];
         //looping through the file content
@@ -110,7 +110,7 @@ function sendgrid($atts,$content=null,$shortcode){
                 $sendgrid_email->addAttachment($file_encoded, null, $name, "attachment", null);
             }
         }
-        
+
     }
 
     //$email['cc']['email_id']
@@ -130,7 +130,7 @@ function sendgrid($atts,$content=null,$shortcode){
     }
 
     //$email['reply_to']['email_id']
-    if(isset($email['reply_to']['email_id'])){      
+    if(isset($email['reply_to']['email_id'])){
         $reply_to_emails = explode(",",$email['reply_to']['email_id']);
         foreach($reply_to_emails as $val){
              $sendgrid_email->setReplyTo($val, null);
@@ -141,27 +141,27 @@ function sendgrid($atts,$content=null,$shortcode){
 
     try {
         $response = $sendgrid->send($sendgrid_email);
-    
+
         //get headers from the response->headers();
-        $header = $response->headers();    
+        $header = $response->headers();
 
         foreach ($header as $val) {
             $val_array = explode(':', $val);
 
             if($val_array[0] == 'X-Message-Id'){
                 //getting the message id from the header response
-                $messageId = $val_array[1]; 
+                $messageId = $val_array[1];
 
                 //setting up tracking array
                 $tracking['tracking_id'] = trim($messageId) ;
                 $tracking['tracking_status'] = 'sent_to_provider';
                 $tracking['tracking_stage'] = 'sent_to_provider';
                 if(!empty($tracking_set))$tracking['tracking_set']=$tracking_set;
-                
+
 	    	// Log data in db
 			require_once __DIR__ .'/includes/notification_helper.php';
     		\notification_log('email', 'sendgrid', $email, $log, $notification_object_type, $notification_object_id, $tracking);
-		    
+
                 break;
             }
         }
@@ -172,12 +172,12 @@ function sendgrid($atts,$content=null,$shortcode){
             $return_value = "success";
         }
 
-        
+
     } catch (Exception $e) {
         echo 'Caught exception: ',  $e->getMessage(), "\n";
         $return_value = "error";
     }
-    
+
     $return_value=\aw2_library::post_actions('all',$return_value,$atts);
     return $return_value;
 }
@@ -190,7 +190,7 @@ function kookoo($atts,$content=null,$shortcode){
     extract(\aw2_library::shortcode_atts( array(
 		'sms' => null,
         'log' => null,
-        'notification_object_type' => null,    
+        'notification_object_type' => null,
         'notification_object_id' => null
     ), $atts, 'aw2_kookoo' ) );
 
@@ -209,8 +209,8 @@ function kookoo($atts,$content=null,$shortcode){
     $url = 'http://www.kookoo.in/outbound/outbound_sms.php';
 
     $apiKey = $sms['provider']['key'];
-	
-	
+
+
     if(empty($apiKey) || strlen($apiKey) === 0){
         $return_value=\aw2_library::post_actions('all','No api key is not provided, check you settings for default api key!',$atts);
         return $return_value;
@@ -219,7 +219,7 @@ function kookoo($atts,$content=null,$shortcode){
     // parameter to send in sms
     $param = array(
         'api_key' => $apiKey,
-        'phone_no' => '0'.$sms['to']['mobile_number'], 
+        'phone_no' => '0'.$sms['to']['mobile_number'],
         'message' => $sms['message']
     );
 
@@ -232,12 +232,12 @@ function kookoo($atts,$content=null,$shortcode){
     $result = curl_exec($ch);
     curl_close($ch);
     $result = simplexml_load_string($result);
-	
+
 	$return_value = 'error';
 	if(isset($result->status)){
 		$return_value= $result->status;
 	}
-	
+
     $return_value=\aw2_library::post_actions('all',$return_value,$atts);
 	return $return_value;
 }
@@ -251,44 +251,44 @@ function msg91($atts,$content=null,$shortcode){
     extract(\aw2_library::shortcode_atts( array(
 		'sms' => null,
         'log' => null,
-        'notification_object_type' => null,    
+        'notification_object_type' => null,
         'notification_object_id' => null
     ), $atts, 'aw2_kookoo' ) );
-	
+
 	// if $sms is not present
     if(is_null($sms)){
         return \aw2_library::post_actions('all','Sms array is required!',$atts);
 	}
-	
+
     // Log data in db
 	require_once __DIR__ .'/includes/notification_helper.php';
     \notification_log('sms', 'msg91', $sms, $log, $notification_object_type, $notification_object_id);
-	
+
 	// check if values are present or not
     if(!isset($sms['to']['mobile_number']))$sms['to']['mobile_number']='';
     if(!isset($sms['message']))$sms['message']='';
     if(!isset($sms['provider']['key']))$sms['provider']['key']='';
-	
+
     // api base url
     $url = 'http://api.msg91.com/api/v2/sendsms';
     $apiKey = $sms['provider']['key'];
-	
+
 	// if api key is not present
 	if(empty($apiKey) || strlen($apiKey) === 0){
         return $return_value=\aw2_library::post_actions('all','No api key is not provided, check you settings for default api key!',$atts);
     }
-	
+
 	// create sms payload Array
-	$payloadArr = array(); 
+	$payloadArr = array();
 	$payloadArr['sender'] = $sms['provider']['sender'];
 	$payloadArr['DLT_TE_ID'] = $sms['dlt_template_id'];
 	$payloadArr['route'] = $sms['provider']['route'];
 	$payloadArr['country'] = $sms['provider']['country'];
 	$payloadArr['sms'][0]['message'] = $sms['message'];
 	$payloadArr['sms'][0]['to'][0] = $sms['to']['mobile_number'];
-	
+
 	$payload = json_encode($payloadArr);
-		
+
 	// use curl to send data
 	$ch = curl_init( $url );
 	curl_setopt( $ch, CURLOPT_POSTFIELDS, $payload );
@@ -296,10 +296,62 @@ function msg91($atts,$content=null,$shortcode){
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	$result = json_decode(curl_exec($ch));
 	curl_close($ch);
-	
+
 	$return_value= $result->type == 'success' ? 'success' : 'error';
 
     $return_value=\aw2_library::post_actions('all',$return_value,$atts);
 	return $return_value;
-	
+
+}
+
+\aw2_library::add_service('notify.sms77','Send Sms77 SMS',['namespace'=>__NAMESPACE__]);
+
+function sms77($atts,$content=null,$shortcode){
+    if(\aw2_library::pre_actions('all',$atts,$content,$shortcode)==false)return;
+
+    extract(\aw2_library::shortcode_atts( array(
+        'sms' => null,
+        'log' => null,
+        'notification_object_type' => null,
+        'notification_object_id' => null
+    ), $atts, 'aw2_kookoo' ) );
+
+    // if sms is null, return
+    if(is_null($sms)) return;
+
+    if(!isset($sms['to']['mobile_number']))$sms['to']['mobile_number']='';
+    if(!isset($sms['message']))$sms['message']='';
+    if(!isset($sms['provider']['key']))$sms['provider']['key']='';
+
+    // Log data in db
+    require_once __DIR__ .'/includes/notification_helper.php';
+    \notification_log('sms', 'sms77', $sms, $log, $notification_object_type, $notification_object_id);
+
+    $url = 'https://gateway.sms77.io/api/sms';
+    $apiKey = $sms['provider']['key'];
+
+    if(empty($apiKey) || strlen($apiKey) === 0){
+        $return_value=\aw2_library::post_actions('all','No api key is not provided, check you settings for default api key!',$atts);
+        return $return_value;
+    }
+
+    // parameter to send in sms
+    $payload = array(
+        'from' => $sms['provider']['sender'],
+        'to' => '0'.$sms['to']['mobile_number'],
+        'text' => $sms['message']
+    );
+
+    $ch = curl_init( $url );
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'SentWith: WPoets.CommunicationHandler', "X-Api-Key: $apiKey"));
+    $result = (int)curl_exec($ch);
+    curl_close($ch);
+
+    $return_value=100 === $result || 101 === $result ? 'success' : 'error';
+
+    $return_value=\aw2_library::post_actions('all',$return_value,$atts);
+    return $return_value;
 }
