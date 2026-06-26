@@ -7,6 +7,9 @@ Adds support to Awesome Enterprise for sending emails, SMS, and push notificatio
 
 ### Changelog  
 
+##### 1.0.7
+* Improved: Updated sendgrid sdk requirement
+  
 ##### 1.0.6
 * Improved: Added support for Amazon SES APIs to send emails with attachments.
   
