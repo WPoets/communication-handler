@@ -3,7 +3,7 @@ namespace aw2\notify;
 
 \aw2_library::add_service('notify.wpmail','Send wp mail',['namespace'=>__NAMESPACE__]);
 
-function wpmail($atts,$content=null,$shortcode){
+function wpmail($atts,$content=null,$shortcode=null){
     if(\aw2_library::pre_actions('all',$atts,$content,$shortcode)==false)return;
 
     extract(\aw2_library::shortcode_atts( array(
@@ -45,7 +45,7 @@ function wpmail($atts,$content=null,$shortcode){
 
 \aw2_library::add_service('notify.sendgrid','Send Sendgrid mail',['namespace'=>__NAMESPACE__]);
 
-function sendgrid($atts,$content=null,$shortcode){
+function sendgrid($atts,$content=null,$shortcode=null){
     if(\aw2_library::pre_actions('all',$atts,$content,$shortcode)==false)return;
 
     //including SENDGRID library
@@ -184,7 +184,7 @@ function sendgrid($atts,$content=null,$shortcode){
 
 \aw2_library::add_service('notify.kookoo','Send Kookoo SMS',['namespace'=>__NAMESPACE__]);
 
-function kookoo($atts,$content=null,$shortcode){
+function kookoo($atts,$content=null,$shortcode=null){
 	if(\aw2_library::pre_actions('all',$atts,$content,$shortcode)==false)return;
 
     extract(\aw2_library::shortcode_atts( array(
@@ -245,7 +245,7 @@ function kookoo($atts,$content=null,$shortcode){
 
 \aw2_library::add_service('notify.msg91','Send msg91 SMS',['namespace'=>__NAMESPACE__]);
 
-function msg91($atts,$content=null,$shortcode){
+function msg91($atts,$content=null,$shortcode=null){
 	if(\aw2_library::pre_actions('all',$atts,$content,$shortcode)==false)return;
 
     extract(\aw2_library::shortcode_atts( array(
@@ -306,7 +306,7 @@ function msg91($atts,$content=null,$shortcode){
 
 \aw2_library::add_service('notify.amazonses', 'Send Amazon SES mail', ['namespace' => __NAMESPACE__]);
 
-function amazonses($atts, $content = null, $shortcode) {
+function amazonses($atts, $content = null, $shortcode = null) {
     if (\aw2_library::pre_actions('all', $atts, $content, $shortcode) == false) return;
 
     extract(\aw2_library::shortcode_atts(array(
