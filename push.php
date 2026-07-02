@@ -104,7 +104,9 @@ class awesome2_push_notification{
 			\aw2_library::set_error('Android Curl failed: ' . curl_error($ch));
 			$return_value= 'fail';
 		}
-		curl_close($ch);
+		if (is_resource($ch)) {
+			curl_close($ch);
+		}
 		
 		return $return_value;
 	}

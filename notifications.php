@@ -230,7 +230,9 @@ function kookoo($atts,$content=null,$shortcode=null){
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     $result = curl_exec($ch);
-    curl_close($ch);
+    if (is_resource($ch)) {
+        curl_close($ch);
+    }
     $result = simplexml_load_string($result);
 	
 	$return_value = 'error';
@@ -295,7 +297,9 @@ function msg91($atts,$content=null,$shortcode=null){
 	curl_setopt( $ch, CURLOPT_HTTPHEADER, array("authkey:$apiKey","Content-Type:application/json"));
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	$result = json_decode(curl_exec($ch));
-	curl_close($ch);
+	if (is_resource($ch)) {
+		curl_close($ch);
+	}
 	
 	$return_value= $result->type == 'success' ? 'success' : 'error';
 
